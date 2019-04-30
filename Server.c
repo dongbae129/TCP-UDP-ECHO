@@ -1,58 +1,55 @@
 #include < winsock2.h >
 #include < stdio.h >
 #pragma comment(lib,"ws2_32.lib")
-
-
 #define BUFSIZE 1024
-
-
 
 void ErrorMessage(char *str);
 
-
-
 void main()
 {
-	WSADATA wsaData;
-	SOCKET hSerSock;
+	WSADATA wsadata;
+	SOCKET h_s_socket;
 	SOCKADDR_IN servAddr;
-	SOCKADDR_IN ClientAddr;
-	int ClientAddrSize;
-	char *servPort = "9190";
+	SOCKADDR_IN clientAddr;
+
+	char *servPort = "12345";
 	char msg[BUFSIZE];
-	int StrLen;
+	int strLen;
+	int c_addrsize;
 
-	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)ErrorMessage("WSAStartup() Error");
+	if (WSAStartup(MAKEWORD(2, 2), &wsadata) != 0)
+		ErrorMessage("WSAStartup() Error");
 
-	hSerSock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	h_s_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
-	if (hSerSock == INVALID_SOCKET)   ErrorMessage("hSerscok Error");
+	if (h_s_socket == INVALID_SOCKET)
+		ErrorMessage("h_s_socket Error");
 
 	memset(&servAddr, 0, sizeof(servAddr));
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servAddr.sin_port = htons(atoi(servPort));
 
-	if (bind(hSerSock, (SOCKADDR*)&servAddr, sizeof(servAddr)) == SOCKET_ERROR) ErrorMessage("Bind Error");
+	if (bind(h_s_socket, (SOCKADDR*)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
+		ErrorMessage("Bind Error");
 
-	printf("%d 포트로 주소 할당이 되었습니다.\n", ntohs(servAddr.sin_port));
+	printf("포트 번호 : %d\n", ntohs(servAddr.sin_port));
 	printf("IP 주소 : %s\n", inet_ntoa(servAddr.sin_addr));
-	printf("서버 대기중입니다.\n");
+	printf("서버 대기중.\n");
 
 	while (1)
 	{
-		ClientAddrSize = sizeof(ClientAddr);
-		StrLen = recvfrom(hSerSock, msg, BUFSIZE, 0, (SOCKADDR*)&ClientAddr, &ClientAddrSize);
-		msg[StrLen] = 0;
-
-		sendto(hSerSock, msg, StrLen, 0, (SOCKADDR*)&ClientAddr, sizeof(ClientAddr));
+		c_addrsize = sizeof(clientAddr);
+		
+		strLen = recvfrom(h_s_socket, msg, BUFSIZE, 0, (SOCKADDR*)&clientAddr, &c_addrsize);
+		msg[strLen] = 0;
+		printf("받은 문자 : %s \n", msg);
+		sendto(h_s_socket, msg, strLen, 0, (SOCKADDR*)&clientAddr, sizeof(clientAddr));
 	}
 
-	closesocket(hSerSock);
+	closesocket(h_s_socket);
 	WSACleanup();
 }
-
-
 
 void ErrorMessage(char *str)
 {

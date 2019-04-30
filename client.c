@@ -11,46 +11,47 @@ void ErrorMessage(char *str);
 
 void main()
 {
-	WSADATA wsaData;
-	SOCKET hSerSock;
+	WSADATA wsadata;
+	SOCKET h_socket;
 	SOCKADDR_IN servAddr;
-	int ServAddrSize;
-	char addr1[100];
-	char servPort[100];
+
+	int s_addrsize;
+	char s_address[100];
+	char s_port[100];
 	char msg[BUFSIZE];
-	int StrLen;
+	int strLen;
 
-	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) ErrorMessage("WSAStartup() Error");
+	if (WSAStartup(MAKEWORD(2, 2), &wsadata) != 0) ErrorMessage("WSAStartup() Error");
 
-	hSerSock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if (hSerSock == INVALID_SOCKET)   ErrorMessage("hTCPscok Error");
+	h_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (h_socket == INVALID_SOCKET)   ErrorMessage("h_socket Error");
 
 	printf("연결할 주소(IP)를 입력하세요 :");
-	gets(addr1);
+	gets(s_address);
 
 	printf("연결할 포트를 입력하세요 :");
-	gets(servPort);
+	gets(s_port);
 
 	memset(&servAddr, 0, sizeof(servAddr));
 	servAddr.sin_family = AF_INET;
-	servAddr.sin_addr.s_addr = inet_addr(addr1);
-	servAddr.sin_port = ntohs(atoi(servPort));
+	servAddr.sin_addr.s_addr = inet_addr(s_address);
+	servAddr.sin_port = ntohs(atoi(s_port));
 
 	printf("접속된 클라이언트 : %s\n", inet_ntoa(servAddr.sin_addr));
-
+	printf("exit is break \n");
 	while (1)
 	{
-		ServAddrSize = sizeof(servAddr);
+		s_addrsize = sizeof(servAddr);
 
 		printf("SEND : ");
 		gets(msg);
 
-		if (stricmp(msg, "q") == 0) break;
+		if (stricmp(msg, "exit") == 0) break;
 
-		sendto(hSerSock, msg, strlen(msg), 0, (SOCKADDR*)&servAddr, sizeof(servAddr));
-		StrLen = recvfrom(hSerSock, msg, BUFSIZE, 0, (SOCKADDR*)&servAddr, &ServAddrSize);
+		sendto(h_socket, msg, strlen(msg), 0, (SOCKADDR*)&servAddr, sizeof(servAddr));
+		strLen = recvfrom(h_socket, msg, BUFSIZE, 0, (SOCKADDR*)&servAddr, &s_addrsize);
 
-		msg[StrLen] = 0;
+		msg[strLen] = 0;
 		printf("RECV : %s\n", msg);
 	}
 
